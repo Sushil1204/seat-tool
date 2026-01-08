@@ -62,7 +62,7 @@ def index():
 
         table_data = df.to_dict(orient="records")
 
-    return render_template("/templates/index.html", data=table_data)
+    return render_template("index.html", data=table_data)
 
 
 # ----- DOWNLOAD ROUTE -----
