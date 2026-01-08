@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Exam Room Allocation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- DataTables -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+  </head>
+  <body class="bg-slate-100 min-h-screen">
+    <!-- LOADING OVERLAY -->
+    <div
+      id="loader"
+      class="hidden fixed inset-0 bg-black/30 flex items-center justify-center z-50"
+    >
+      <div class="bg-white px-6 py-4 rounded-lg shadow flex items-center gap-3">
+        <div
+          class="w-5 h-5 border-2 border-slate-300 border-t-slate-800 rounded-full animate-spin"
+        ></div>
+        <span class="text-sm font-medium text-slate-700">Processing PDF…</span>
+      </div>
+    </div>
+
+    <!-- HEADER -->
+    <header class="bg-white border-b px-6 py-4">
+      <h1 class="text-lg font-semibold text-slate-800">
+        Exam Room Allocation Tool
+      </h1>
+    </header>
+
+    <main class="max-w-6xl mx-auto mt-8">
+      <!-- UPLOAD CARD -->
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <h2 class="font-medium text-slate-800">Upload Exam PDF</h2>
+        <p class="text-sm text-slate-500 mt-1">
+          Generate room-wise seating and Excel sheet.
+        </p>
+
+        <form
+          id="uploadForm"
+          method="post"
+          enctype="multipart/form-data"
+          class="mt-4 flex gap-4"
+        >
+          <input type="file" name="pdf" required class="block w-full text-sm" />
+
+          <button
+            id="generateBtn"
+            class="px-6 py-2 bg-slate-800 text-white rounded-md hover:bg-slate-900 flex items-center gap-2"
+          >
+            <span id="btnText">Generate</span>
+            <svg
+              id="btnSpinner"
+              class="hidden w-4 h-4 animate-spin"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="white"
+                stroke-width="4"
+                fill="none"
+                opacity="0.3"
+              />
+              <path
+                d="M12 2a10 10 0 0 1 10 10"
+                stroke="white"
+                stroke-width="4"
+                fill="none"
+              />
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      <!-- TABLE SECTION -->
+      {% if data %}
+      <div class="bg-white rounded-lg shadow-sm p-6 mt-8">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-medium text-slate-800">Room-wise Seat List</h2>
+
+          <!-- DOWNLOAD BUTTON -->
+          <a
+            href="/download"
+            class="flex items-center gap-2 px-3 py-1.5 border rounded-md text-sm text-slate-700 hover:bg-slate-100"
+          >
+            <i data-lucide="download" class="w-4 h-4"></i>
+            Download Excel
+          </a>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table id="seatTable" class="display w-full text-sm">
+            <thead>
+              <tr>
+                <th>Room</th>
+                <th>Batch</th>
+                <th>Seat Number</th>
+                <th>Date</th>
+                <th>Subject</th>
+                <th>Paper</th>
+                <th>Medium</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in data %}
+              <tr>
+                <td>{{ r["Room"] }}</td>
+                <td>{{ r["Batch"] }}</td>
+                <td>{{ r["Seat Number"] }}</td>
+                <td>{{ r["Date"] }}</td>
+                <td>{{ r["Subject"] }}</td>
+                <td>{{ r["Paper"] }}</td>
+                <td>{{ r["Medium"] }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+    </main>
+
+    <script>
+      lucide.createIcons();
+
+      // ----- DATATABLE -----
+      $(document).ready(function () {
+        if ($("#seatTable").length) {
+          $("#seatTable").DataTable({
+            lengthMenu: [
+              [30, 50, 100, -1],
+              [30, 50, 100, "All"],
+            ],
+            pageLength: 30,
+            order: [[0, "asc"]],
+          });
+        }
+      });
+
+      // ----- LOADING STATE -----
+      const form = document.getElementById("uploadForm");
+      const loader = document.getElementById("loader");
+      const btn = document.getElementById("generateBtn");
+      const btnText = document.getElementById("btnText");
+      const btnSpinner = document.getElementById("btnSpinner");
+
+      form.addEventListener("submit", () => {
+        loader.classList.remove("hidden");
+        btn.disabled = true;
+        btn.classList.add("opacity-70", "cursor-not-allowed");
+        btnText.textContent = "Processing...";
+        btnSpinner.classList.remove("hidden");
+      });
+    </script>
+  </body>
+</html>
